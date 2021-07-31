@@ -28,7 +28,9 @@ module.exports.getUser = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
+      if (err.name === 'CastError') {
+        res.status(castError).send({ message: 'Переданы некорректные данные' });
+      } else if (err.message === 'NotValidId') {
         res.status(notFound).send({ message: 'Пользователя нет в базе' });
       } else {
         res.status(serverError).send({ message: 'На сервере произошла ошибка при поиске пользователя' });

@@ -1,5 +1,7 @@
 const Card = require('../models/card');
-const { validationError, serverError, notFound } = require('../utils/constants');
+const {
+  validationError, serverError, notFound, castError,
+} = require('../utils/constants');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -27,7 +29,9 @@ module.exports.deleteCard = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
+      if (err.name === 'CastError') {
+        res.status(castError).send({ message: 'Переданы некорректные данные' });
+      } else if (err.message === 'NotValidId') {
         res.status(notFound).send({ message: 'Карточка не найдена' });
       } else {
         res.status(serverError).send({ message: 'На сервере произошла ошибка при удалении карточки' });
@@ -41,7 +45,9 @@ module.exports.likeCard = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
+      if (err.name === 'CastError') {
+        res.status(castError).send({ message: 'Переданы некорректные данные' });
+      } else if (err.message === 'NotValidId') {
         res.status(notFound).send({ message: 'Карточка не найдена' });
       } else {
         res.status(serverError).send({ message: 'На сервере произошла ошибка при лайке карточки' });
@@ -55,7 +61,9 @@ module.exports.dislikeCard = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
+      if (err.name === 'CastError') {
+        res.status(castError).send({ message: 'Переданы некорректные данные' });
+      } else if (err.message === 'NotValidId') {
         res.status(notFound).send({ message: 'Карточка не найдена' });
       } else {
         res.status(serverError).send({ message: 'На сервере произошла ошибка при лайке карточки' });
