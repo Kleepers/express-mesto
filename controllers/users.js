@@ -42,6 +42,7 @@ module.exports.updateProfile = (req, res) => {
   const { name, about } = req.body;
   if (req.body.name && req.body.about) {
     User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
+      .orFail(new Error('NotValidId'))
       .then((user) => res.send({ data: user }))
       .catch((err) => {
         if (err.name === 'ValidationError') {
@@ -49,6 +50,8 @@ module.exports.updateProfile = (req, res) => {
         }
         if (err.name === 'CastError') {
           res.status(castError).send({ message: 'Пользователь не найден' });
+        } else if (err.message === 'NotValidId') {
+          res.status(notFound).send({ message: 'Пользователя нет в базе' });
         } else {
           res.status(serverError).send({ message: 'На сервере произошла ошибка при обновлении профиля' });
         }
@@ -62,6 +65,7 @@ module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
   if (req.body.avatar) {
     User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
+      .orFail(new Error('NotValidId'))
       .then((user) => res.send({ data: user }))
       .catch((err) => {
         if (err.name === 'ValidationError') {
@@ -69,6 +73,8 @@ module.exports.updateAvatar = (req, res) => {
         }
         if (err.name === 'CastError') {
           res.status(castError).send({ message: 'Пользователь не найден' });
+        } else if (err.message === 'NotValidId') {
+          res.status(notFound).send({ message: 'Пользователя нет в базе' });
         } else {
           res.status(serverError).send({ message: 'На сервере произошла ошибка при обновлении аватара пользователя' });
         }
