@@ -7,6 +7,8 @@ const UnauthorizedError = require('../errors/unauth-err');
 const NotFoundError = require('../errors/not-found-err');
 const ConflictError = require('../errors/conflict-err');
 
+const { JWT_SECRET = 'crimson group' } = process.env;
+
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
@@ -105,12 +107,12 @@ module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'crimson group', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
       res
         .cookie('jwt', token, {
           httpOnly: true,
         })
-        .end();
+        .send({ message: 'Логин прошел успешно' });
     })
     .catch(() => { throw new UnauthorizedError('Неправильные почта или пароль'); })
     .catch(next);

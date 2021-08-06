@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
+const rateLimit = require('express-rate-limit');
 
 const {
   celebrate, Joi, isCelebrateError,
@@ -17,7 +18,13 @@ const NotFoundError = require('./errors/not-found-err');
 
 const { PORT = 3000 } = process.env;
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+
 const app = express();
+app.use(limiter);
 app.use(cookieParser());
 app.use(helmet());
 
@@ -32,7 +39,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().pattern(/\w+@\w+\.\w+/).messages({
+    email: Joi.string().email({ tlds: { allow: false } }).messages({
       'string.pattern.base': 'В поле "email" нужно ввести электронную почту',
       'string.empty': 'Поле "email" должно быть заполнено',
     }),
@@ -45,7 +52,7 @@ app.post('/signin', celebrate({
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().pattern(/\w+@\w+\.\w+/).messages({
+    email: Joi.string().email({ tlds: { allow: false } }).messages({
       'string.pattern.base': 'В поле "email" нужно ввести электронную почту',
       'string.empty': 'Поле "email" должно быть заполнено',
     }),
@@ -95,8 +102,4 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
 
-});
-
-app.use('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 });

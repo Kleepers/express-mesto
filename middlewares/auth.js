@@ -1,15 +1,18 @@
 const jwt = require('jsonwebtoken');
+const UnauthorizedError = require('../errors/unauth-err');
+
+const { JWT_SECRET = 'crimson group' } = process.env;
 
 module.exports = (req, res, next) => {
   const token = req.cookies.jwt;
   if (!token) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
+    throw new UnauthorizedError('Необходима авторизация');
   }
   let payload;
   try {
-    payload = jwt.verify(token, 'crimson group');
+    payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return res.status(401).send({ message: 'Необходима авторизация' });
+    throw new UnauthorizedError('Необходима авторизация');
   }
 
   req.user = payload;
