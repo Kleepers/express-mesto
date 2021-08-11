@@ -5,11 +5,13 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
+
 const {
   celebrate, Joi, isCelebrateError,
 } = require('celebrate');
 const userRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
@@ -22,6 +24,7 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
 });
+
 
 const app = express();
 app.use(limiter);
@@ -36,6 +39,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useCreateIndex: true,
   useFindAndModify: false,
 });
+
+app.use(requestLogger);
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -80,6 +85,8 @@ app.post('/signup', celebrate({
 app.use(auth);
 app.use('/users', userRouter);
 app.use('/cards', cardsRouter);
+
+app.use(errorLogger);
 
 app.use((req, res, next) => {
   next(new NotFoundError('Ресурс не найден.'));

@@ -10,10 +10,12 @@
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
     "express-rate-limit": "^5.3.0",
+    "express-winston": "^4.1.0",
     "helmet": "^4.6.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.13.4",
-    "validator": "^13.6.0"
+    "validator": "^13.6.0",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "eslint": "^7.31.0",
